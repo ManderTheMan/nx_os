@@ -7,6 +7,26 @@ import {
 } from 'lucide-react';
 import { useFascia } from '../6-energy/FasciaContext';
 
+interface Project {
+  id: string;
+  title: string;
+  state: 'idle' | 'active' | 'pending';
+  tasks: Task[];
+}
+
+interface Task {
+  id: string;
+  title: string;
+  status: 'done' | 'active' | 'pending';
+}
+
+interface AnalysisResult {
+  title?: string;
+  concepts?: Array<{ id: string; title: string; status: 'done' | 'active' | 'pending' }>;
+  patterns?: Array<{ id: string; title: string; status: 'done' | 'active' | 'pending' }>;
+  error?: string;
+}
+
 export default function ActionView() {
   const { activeGuardian, askOracle, addParticle } = useFascia();
   const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
@@ -14,7 +34,7 @@ export default function ActionView() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [workshopContent, setWorkshopContent] = useState("");
 
-  const [projects, setProjects] = useState<any[]>([
+  const [projects, setProjects] = useState<Project[]>([
     { 
       id: 'default', title: 'Awaiting Input', state: 'idle', 
       tasks: [] 
@@ -50,7 +70,7 @@ export default function ActionView() {
       const jsonString = await askOracle(prompt, text);
       const cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
       
-      const analysis = JSON.parse(cleanJson);
+      const analysis: AnalysisResult = JSON.parse(cleanJson);
 
       if (analysis.error) throw new Error(analysis.error);
 
@@ -62,9 +82,10 @@ export default function ActionView() {
       }]);
       
       addParticle("Analysis complete. Fractal nodes generated.", 'agent', 'Gemini');
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to parse document";
       console.error(err);
-      setErrorMsg(err.message || "Failed to parse document");
+      setErrorMsg(errorMessage);
       addParticle("Analysis failed. Data structure unstable.", 'agent', 'Keeper');
     }
 
@@ -127,7 +148,7 @@ export default function ActionView() {
         )}
 
         <div className="space-y-12">
-          {projects.map((project: any) => (
+          {projects.map((project) => (
             <div key={project.id} className="relative pl-8 border-l-2 border-slate-200">
               <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-900 border-4 border-[#f8f9fa]" />
               
@@ -139,7 +160,7 @@ export default function ActionView() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {project.tasks.map((task: any, i: number) => (
+                {project.tasks.map((task, i: number) => (
                   <motion.div 
                     key={i}
                     whileHover={{ y: -2, borderColor: '#0d9488' }}

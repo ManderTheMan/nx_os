@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFascia } from '../6-energy/FasciaContext';
-import { User, Shield, Zap, Brain, Heart, Database } from 'lucide-react';
+import { User, Shield, Brain, Heart, Database } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -62,15 +61,18 @@ export default function StreamView() {
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      code({node, inline, className, children, ...props}: any) {
-                        return !inline ? (
+                      code(props) {
+                        const {children, ...rest} = props;
+                        const match = /language-(\w+)/.exec(rest.className || '');
+                        const isInline = !match;
+                        return isInline ? (
+                          <code className="bg-muted/20 px-1 py-0.5 rounded text-primary font-mono text-xs" {...rest}>
+                            {children}
+                          </code>
+                        ) : (
                           <div className="bg-slate-900 text-slate-200 p-3 rounded-lg overflow-x-auto my-2 border border-slate-700 font-mono text-xs">
                             {children}
                           </div>
-                        ) : (
-                          <code className="bg-muted/20 px-1 py-0.5 rounded text-primary font-mono text-xs" {...props}>
-                            {children}
-                          </code>
                         )
                       }
                     }}

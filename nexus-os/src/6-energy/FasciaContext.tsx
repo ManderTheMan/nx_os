@@ -43,7 +43,7 @@ interface FasciaContextType {
 const FasciaContext = createContext<FasciaContextType | undefined>(undefined);
 
 export const FasciaProvider = ({ children }: { children: ReactNode }) => {
-  const [resolution, setResolution] = useState(() => Number(localStorage.getItem('nexus_resolution')) || 0);
+  const [resolutionState, setResolutionState] = useState(() => Number(localStorage.getItem('nexus_resolution')) || 0);
   
   const [currentView, setCurrentView] = useState<ViewState>(() => {
     return (localStorage.getItem('nexus_view') as ViewState) || 'home';
@@ -65,18 +65,26 @@ export const FasciaProvider = ({ children }: { children: ReactNode }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [intelligenceMode, setIntelligenceMode] = useState<IntelligenceMode>('STEALTH');
+  const [intelligenceMode, setIntelligenceMode] = useState<IntelligenceMode>(() => {
+    const savedResolution = Number(localStorage.getItem('nexus_resolution')) || 0;
+    return savedResolution > 60 ? 'ORACLE' : 'STEALTH';
+  });
 
-  useEffect(() => { localStorage.setItem('nexus_resolution', resolution.toString()); }, [resolution]);
+  const setResolution = (level: number) => {
+    setResolutionState(level);
+    // Update intelligence mode based on resolution
+    if (level > 60 && intelligenceMode !== 'ORACLE') {
+      setIntelligenceMode('ORACLE');
+    } else if (level <= 60 && intelligenceMode !== 'STEALTH') {
+      setIntelligenceMode('STEALTH');
+    }
+  };
+
+  useEffect(() => { localStorage.setItem('nexus_resolution', resolutionState.toString()); }, [resolutionState]);
   useEffect(() => { localStorage.setItem('nexus_view', currentView); }, [currentView]);
   useEffect(() => { localStorage.setItem('nexus_domain', currentDomain); }, [currentDomain]);
   useEffect(() => { localStorage.setItem('nexus_particles', JSON.stringify(particles)); }, [particles]);
   useEffect(() => { localStorage.setItem('nexus_archives', JSON.stringify(archives)); }, [archives]);
-
-  useEffect(() => {
-    if (resolution > 60) setIntelligenceMode('ORACLE');
-    else setIntelligenceMode('STEALTH');
-  }, [resolution]);
 
   const toggleIntelligence = () => {
     setIntelligenceMode(prev => prev === 'STEALTH' ? 'ORACLE' : 'STEALTH');
@@ -119,7 +127,7 @@ export const FasciaProvider = ({ children }: { children: ReactNode }) => {
 
   const askOracle = async (prompt: string, context: string = '') => {
     const STORED_KEY = import.meta.env.VITE_GEMINI_KEY || localStorage.getItem('nexus_api_key');
-    const systemInstruction = resolution < 50 
+    const systemInstruction = resolutionState < 50 
       ? "MODE: ANALYSIS. Extract key data points. Output JSON." 
       : "MODE: SYNTHESIS. Find deep patterns and connections. Output JSON.";
 
@@ -139,15 +147,14 @@ export const FasciaProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Chat Router (Cleaned unused vars)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _callAI = async (_input: string, _agent: string, _basePersona: string) => {
-    console.log("Chat inactive in simplified mode");
-  };
+  // Chat Router (Cleaned unused vars) - Disabled for now
+  // const _callAI = async (_input: string, _agent: string, _basePersona: string) => {
+  //   console.log("Chat inactive in simplified mode");
+  // };
 
   return (
     <FasciaContext.Provider value={{ 
-      resolution, setResolution, 
+      resolution: resolutionState, setResolution, 
       currentView, setCurrentView,
       currentDomain, setCurrentDomain,
       activeGuardian, setActiveGuardian,
@@ -160,6 +167,7 @@ export const FasciaProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFascia = () => {
   const context = useContext(FasciaContext);
   if (!context) throw new Error('useFascia must be used within a FasciaProvider');
