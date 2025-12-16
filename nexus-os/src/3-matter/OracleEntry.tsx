@@ -118,7 +118,7 @@ export default function OracleEntry() {
 
         {/* Removed mode='wait' to fix the framer-motion warning */}
         <AnimatePresence>
-          {itemsToShow.map((item: any, i) => {
+          {itemsToShow.map((item, i) => {
             const total = itemsToShow.length;
             const angle = (i * (360 / total)) - 90;
             const radian = (angle * Math.PI) / 180;
@@ -140,7 +140,7 @@ export default function OracleEntry() {
                   className="group flex flex-col items-center gap-2"
                 >
                   <div className={`w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center hover:shadow-md transition-all ${activeDomain ? 'ring-2 ring-current ' + DOMAIN_MAP[activeDomain].color : ''}`}>
-                    <item.icon size={20} className={item.color || 'text-slate-600'} />
+                    <item.icon size={20} className={'color' in item && typeof item.color === 'string' ? item.color : 'text-slate-600'} />
                   </div>
                   
                   <div className={`absolute top-14 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none transition-opacity duration-300 ${isHovered || activeDomain ? 'opacity-100' : 'opacity-0'}`}>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PenTool, Box, Layers, GitBranch, Plus, FileText, Trash2, Archive, RefreshCw, Database } from 'lucide-react';
+import { PenTool, Box, Layers, GitBranch, Plus, FileText, Trash2, Archive, Database } from 'lucide-react';
 import { useFascia } from '../6-energy/FasciaContext';
 import { MOCK_FILES } from '../9-spirit/mockVault';
 

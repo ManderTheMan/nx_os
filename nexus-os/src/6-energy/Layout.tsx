@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ReactNode } from 'react'; // Fixes the ReactNode error
 import { useFascia, type ViewState } from './FasciaContext'; // Fixes the 'home' type error
 import { 

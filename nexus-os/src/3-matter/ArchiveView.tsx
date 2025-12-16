@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useFascia } from '../6-energy/FasciaContext';
 import { Archive, RotateCcw, Clock } from 'lucide-react';
